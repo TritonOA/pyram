@@ -25,8 +25,11 @@ PyRAM also provides various conveniences, e.g. automatic calculation of range
 and depth steps (though these can be overridden using keyword arguments).
 """
 
-import numpy
 from time import process_time
+
+import numpy
+import numpy.typing as npt
+
 from pyram.matrc import matrc
 from pyram.solve import solve
 from pyram.outpt import outpt
@@ -34,16 +37,29 @@ from pyram.outpt import outpt
 
 class PyRAM:
 
-    _np_default = 8
-    _dzf = 0.1
-    _ndr_default = 1
-    _ndz_default = 1
-    _ns_default = 1
-    _lyrw_default = 20
+    _np_default: int = 8
+    _dzf: float = 0.1
+    _ndr_default: int = 1
+    _ndz_default: int = 1
+    _ns_default: int = 1
+    _lyrw_default: int = 20
     _id_default = 0
 
     def __init__(
-        self, freq, zs, zr, z_ss, rp_ss, cw, z_sb, rp_sb, cb, rhob, attn, rbzb, **kwargs
+        self,
+        freq: float,
+        zs: float,
+        zr: float,
+        z_ss: npt.ArrayLike,
+        rp_ss: npt.ArrayLike,
+        cw: npt.ArrayLike,
+        z_sb: npt.ArrayLike,
+        rp_sb: npt.ArrayLike,
+        cb: npt.ArrayLike,
+        rhob: npt.ArrayLike,
+        attn: npt.ArrayLike,
+        rbzb: npt.ArrayLike,
+        **kwargs
     ):
         """
         -------

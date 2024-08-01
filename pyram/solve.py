@@ -1,6 +1,7 @@
 """solve function definition"""
 
 from numba import jit, int64, complex128
+import numpy.typing as npt
 
 
 @jit(
@@ -19,7 +20,19 @@ from numba import jit, int64, complex128
     ),
     nopython=True,
 )
-def solve(u, v, s1, s2, s3, r1, r2, r3, iz, nz, np):
+def solve(
+    u: npt.ArrayLike,
+    v: npt.ArrayLike,
+    s1: npt.ArrayLike,
+    s2: npt.ArrayLike,
+    s3: npt.ArrayLike,
+    r1: npt.ArrayLike,
+    r2: npt.ArrayLike,
+    r3: npt.ArrayLike,
+    iz: int,
+    nz: int,
+    np: int,
+) -> None:
     """The tridiagonal solver"""
 
     eps = 1e-30
