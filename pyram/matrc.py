@@ -1,17 +1,62 @@
-'''solve function definition'''
+"""solve function definition"""
 
 from numba import jit, float64, int64, complex128
 
 
-@jit((float64, float64, int64, int64, int64, int64, float64[:], float64[:],
-     float64[:], complex128[:], float64[:], float64[:], float64[:],
-     complex128[:], float64[:], complex128[:, :], complex128[:, :],
-     complex128[:, :], complex128[:, :], complex128[:, :], complex128[:, :],
-     complex128[:], complex128[:]), nopython=True)
-def matrc(k0, dz, iz, jz, nz, np, f1, f2, f3, ksq, alpw, alpb, ksqw, ksqb,
-          rhob, r1, r2, r3, s1, s2, s3, pd1, pd2):
-
-    '''The tridiagonal matrices'''
+@jit(
+    (
+        float64,
+        float64,
+        int64,
+        int64,
+        int64,
+        int64,
+        float64[:],
+        float64[:],
+        float64[:],
+        complex128[:],
+        float64[:],
+        float64[:],
+        float64[:],
+        complex128[:],
+        float64[:],
+        complex128[:, :],
+        complex128[:, :],
+        complex128[:, :],
+        complex128[:, :],
+        complex128[:, :],
+        complex128[:, :],
+        complex128[:],
+        complex128[:],
+    ),
+    nopython=True,
+)
+def matrc(
+    k0,
+    dz,
+    iz,
+    jz,
+    nz,
+    np,
+    f1,
+    f2,
+    f3,
+    ksq,
+    alpw,
+    alpb,
+    ksqw,
+    ksqb,
+    rhob,
+    r1,
+    r2,
+    r3,
+    s1,
+    s2,
+    s3,
+    pd1,
+    pd2,
+):
+    """The tridiagonal matrices"""
 
     a1 = k0**2 / 6
     a2 = 2 * k0**2 / 3

@@ -1,4 +1,4 @@
-''' PyRAMmp class definition '''
+""" PyRAMmp class definition """
 
 from multiprocessing.pool import Pool
 from pyram.PyRAM import PyRAM
@@ -6,46 +6,44 @@ from time import sleep
 
 
 def run_pyram(run):
-
-    '''
+    """
     Add a new PyRAM run. Needs to be a function rather than a class method.
-    '''
+    """
 
     args, kwargs = run[0], run[1]
 
-    freq = args['freq']
-    zs = args['zs']
-    zr = args['zr']
-    z_ss = args['z_ss']
-    rp_ss = args['rp_ss']
-    cw = args['cw']
-    z_sb = args['z_sb']
-    rp_sb = args['rp_sb']
-    cb = args['cb']
-    rhob = args['rhob']
-    attn = args['attn']
-    rbzb = args['rbzb']
+    freq = args["freq"]
+    zs = args["zs"]
+    zr = args["zr"]
+    z_ss = args["z_ss"]
+    rp_ss = args["rp_ss"]
+    cw = args["cw"]
+    z_sb = args["z_sb"]
+    rp_sb = args["rp_sb"]
+    cb = args["cb"]
+    rhob = args["rhob"]
+    attn = args["attn"]
+    rbzb = args["rbzb"]
 
-    pyram = PyRAM(freq, zs, zr, z_ss, rp_ss, cw, z_sb, rp_sb, cb, rhob,
-                  attn, rbzb, **kwargs)
+    pyram = PyRAM(
+        freq, zs, zr, z_ss, rp_ss, cw, z_sb, rp_sb, cb, rhob, attn, rbzb, **kwargs
+    )
     results = pyram.run()
 
     return results
 
 
-class PyRAMmp():
-
-    '''
+class PyRAMmp:
+    """
     The PyRAMmp class sets up and runs a multiprocessing pool to enable
     parallel PyRAM model runs.
-    '''
+    """
 
     def __init__(self, processes=None, maxtasksperchild=None):
-
-        '''
+        """
         Initialise the pool and variable lists.
         processes and maxtasksperchild are passed to the pool.
-        '''
+        """
 
         self.pool = Pool(processes=processes, maxtasksperchild=maxtasksperchild)
         self.results = []  # Results from PyRAM.run()
@@ -57,11 +55,10 @@ class PyRAMmp():
         self._new = True  # Flag to indicate ready for new set of runs
 
     def submit_runs(self, runs):
-
-        '''
+        """
         Submit new runs to the pool as resources become available
         runs is a list of PyRAM input tuples (args, kwargs)
-        '''
+        """
 
         # Add to waiting list
         for run in runs:
@@ -88,10 +85,9 @@ class PyRAMmp():
             self._wait()
 
     def _wait(self):
-
-        '''
+        """
         Wait for all submitted runs to complete.
-        '''
+        """
 
         while self._num_active > 0:
             self.submit_runs([])
@@ -100,19 +96,17 @@ class PyRAMmp():
         self._new = True
 
     def close(self):
-
-        '''
+        """
         Close the pool and wait for all processes to finish.
-        '''
+        """
 
         self.pool.close()
         self.pool.join()
 
     def _get_output(self, output):
-
-        '''
+        """
         Get a PyRAM output.
-        '''
+        """
 
         self._outputs.append(output)
 
