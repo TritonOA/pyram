@@ -866,7 +866,7 @@ class PyRAM:
 
         _iter = 0
         jter = 0  # Missing from original code - assume this is correct
-        dz = np.Inf
+        dz = np.inf
 
         while (np.abs(dz) > err) and (_iter < nter - 1):
             p = a[n - 1] + a[n] * z
