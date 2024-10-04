@@ -12,27 +12,34 @@ class TestPyRAM(unittest.TestCase):
     '''
 
     def setUp(self):
-
+        z_ss = numpy.array([0, 100, 400])
+        rp_ss = numpy.array([0, 25000])
+        cw = numpy.array([[1480, 1530], [1520, 1530], [1530, 1530]])
+        z_sb = numpy.array([[200, 400]])
+        rp_sb = numpy.array([0, 40000])
+        cb = numpy.array([[1700, 1700]])
+        rhob = numpy.array([[1.5, 1.5]])
+        attn = numpy.array([[0.5, 0.5]])
+        rbzb = numpy.array([[0, 200], [40000, 400]])
         self.inputs = dict(freq=50,
-                           zs=50,
-                           zr=50,
-                           z_ss=numpy.array([0, 100, 400]),
-                           rp_ss=numpy.array([0, 25000]),
-                           cw=numpy.array([[1480, 1530],
-                                           [1520, 1530],
-                                           [1530, 1530]]),
-                           z_sb=numpy.array([0]),
-                           rp_sb=numpy.array([0]),
-                           cb=numpy.array([[1700]]),
-                           rhob=numpy.array([[1.5]]),
-                           attn=numpy.array([[0.5]]),
-                           rmax=50000,
-                           dr=500,
-                           dz=2,
-                           zmplt=500,
-                           c0=1600,
-                           rbzb=numpy.array([[0, 200],
-                                             [40000, 400]]))
+                      zs=50,
+                      zr=50,
+                      z_ss=z_ss,
+                      rp_ss=rp_ss,
+                      cw=cw,
+                      z_sb=z_sb,
+                      rp_sb=rp_sb,
+                      cb=cb,
+                      rhob=rhob,
+                      attn=attn,
+                      rbzb=rbzb,
+                      rmax=50000,
+                      dr=500,
+                      dz=2,
+                      zmplt=500,
+                      c0=1600)
+
+
 
         ref_tl_file = 'tl_ref.line'
         dat = numpy.fromfile(ref_tl_file, sep='\t').reshape([100, 2])
@@ -53,7 +60,6 @@ class TestPyRAM(unittest.TestCase):
                       dz=self.inputs['dz'], zmplt=self.inputs['zmplt'],
                       c0=self.inputs['c0'])
         pyram.run()
-
         with open('tl.line', 'w') as fid:
             for ran in range(len(pyram.vr)):
                 fid.write(str(pyram.vr[ran]) + '\t' + str(pyram.tll[ran]) + '\n')
