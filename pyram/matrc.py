@@ -65,7 +65,6 @@ def matrc(
     cfact = 0.5 / dz**2
     dfact = 1 / 12
 
-    # New matrices when iz == jz
     if iz == jz:
         i1 = 1
         i2 = nz
@@ -79,8 +78,8 @@ def matrc(
             f2[i] = 1 / rhob[i]
             f3[i] = alpb[i]
             ksq[i] = ksqb[i]
-    # Updated matrices when iz != jz
-    elif iz > jz:
+
+    if iz > jz:
         i1 = jz
         i2 = iz + 1
         for i in range(jz + 1, iz + 1):
@@ -88,7 +87,8 @@ def matrc(
             f2[i] = 1
             f3[i] = alpw[i]
             ksq[i] = ksqw[i]
-    elif iz < jz:
+
+    if iz < jz:
         i1 = iz
         i2 = jz + 1
         for i in range(iz + 1, jz + 1):
@@ -98,7 +98,6 @@ def matrc(
             ksq[i] = ksqb[i]
 
     # Discretization by Galerkin's method
-
     for i in range(i1, i2 + 1):
 
         c1 = cfact * f1[i] * (f2[i - 1] + f2[i]) * f3[i - 1]
@@ -116,7 +115,7 @@ def matrc(
             s2[i, j] = a2 + pd1[j] * d2
             s3[i, j] = a3 + pd1[j] * d3
 
-    # The matrix decomposition
+    # Matrix decomposition
     for j in range(np):
 
         for i in range(i1, iz + 1):
