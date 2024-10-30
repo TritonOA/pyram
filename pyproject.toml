@@ -27,3 +27,6 @@ keywords = ["RAM", "Acoustics", "Parabolic Equation"]
 [project.urls]
 Homepage = "https://github.com/TritonOA/pyram"
 Issues = "https://github.com/TritonOA/pyram/issues"
+
+[tool.setuptools.packages.find]
+where = ["src/"]
