@@ -4,7 +4,8 @@
 
 PyRAM is a Python adaptation of the Range-dependent Acoustic Model (RAM).
 RAM was created by Michael D. Collins at the US Naval Research Laboratory.
-This adaptation is of RAM v1.5, available from the [Ocean Acoustics Library](https://oalib-acoustics.org/models-and-software/parabolic-equation/).
+This is an improved Python adaptation of RAM v1.5, available from the [Ocean Acoustics Library](https://oalib-acoustics.org/models-and-software/parabolic-equation/).
+The [original PyRAM adaptation](https://github.com/marcuskd/pyram) was created by [Marcus Donnelly](https://github.com/marcuskd).
 
 The purpose of PyRAM is to provide a version of RAM which can be used within a Python interpreter environment (e.g. Spyder or the Jupyter notebook) and is
 easier to understand, extend, and integrate into other applications than the Fortran version.
