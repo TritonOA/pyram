@@ -1,0 +1,10 @@
+name: toa-pyram
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.12
+  - matplotlib
+  - numba
+  - numpy
+  - pip
