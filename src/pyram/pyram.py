@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Description:
     A jitted function that takes in the mesh parameters and computes the parabolic equation solution 
@@ -10,11 +11,11 @@ Author: Hunter Akins
 Institution: Scripps Institution of Oceanography, UC San Diego
 """
 
+from numba import jit_module
 import numpy
 from pyram.matrc import matrc
 from pyram.solve import solve
 from pyram.outpt import outpt
-from numba import jit, njit, jit_module
 
 
 def solve_field(
