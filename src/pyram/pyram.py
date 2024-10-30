@@ -1105,7 +1105,7 @@ def guerre(a, n, z, err, nter):
 
     _iter = 0
     jter = 0  # Missing from original code - assume this is correct
-    dz = numpy.Inf
+    dz = numpy.inf
 
     while (numpy.abs(dz) > err) and (_iter < nter - 1):
         p = a[n - 1] + a[n] * z

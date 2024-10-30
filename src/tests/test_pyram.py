@@ -9,12 +9,15 @@ Author: Hunter Akins
 Institution: Scripps Institution of Oceanography, UC San Diego
 """
 
+from pathlib import Path
+import sys
+
 import numpy 
 from matplotlib import pyplot as plt
-from pyram import PyRAM as pr
-#from pyram import raw_pyram as rpr
-import TritonOA.pyram.pyram.raw_pyram as rpr
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "src"))
+
+import pyram.pyram as rpr
 
 
 freq=50.0
@@ -65,34 +68,34 @@ plt.gca().invert_yaxis()
 
 
 # run once to compile
-ram_mod = pr.PyRAM(freq, zs, zs, z_ss, rp_ss, cw, z_sb, rp_sb, cb, rhob, attn, rbzb, **{'dr':dr, 'dz':dz})
+# ram_mod = pr.PyRAM(freq, zs, zs, z_ss, rp_ss, cw, z_sb, rp_sb, cb, rhob, attn, rbzb, **{'dr':dr, 'dz':dz})
 
 # run 3 times to test speed
-print('running PyRAM')
-for i in range(3):
-    now = time.time()
-    ram_mod.run()
-    print('proc_time', time.time() - now)
-print('-----------------------')
-pout = ram_mod.cpg.conj()
-zout = ram_mod.vz
-rout = ram_mod.vr
+# print('running PyRAM')
+# for i in range(3):
+#     now = time.time()
+#     ram_mod.run()
+#     print('proc_time', time.time() - now)
+# print('-----------------------')
+# pout = ram_mod.cpg.conj()
+# zout = ram_mod.vz
+# rout = ram_mod.vr
 
 
-pout *= numpy.exp(-1j*rout*ram_mod.k0)
-pout = -pout / numpy.sqrt(rout * 8 * numpy.pi) * numpy.exp(-1j*numpy.pi/4) / numpy.pi
+# pout *= numpy.exp(-1j*rout*ram_mod.k0)
+# pout = -pout / numpy.sqrt(rout * 8 * numpy.pi) * numpy.exp(-1j*numpy.pi/4) / numpy.pi
 
-ram_tl = 20*numpy.log10(numpy.abs(numpy.squeeze(pout))/numpy.max(numpy.abs(pout)))
+# ram_tl = 20*numpy.log10(numpy.abs(numpy.squeeze(pout))/numpy.max(numpy.abs(pout)))
 
 
-plt.figure()
-plt.pcolormesh(rout, zout, ram_tl, cmap='jet')
-plt.colorbar()
-plt.gca().invert_yaxis()
+# plt.figure()
+# plt.pcolormesh(rout, zout, ram_tl, cmap='jet')
+# plt.colorbar()
+# plt.gca().invert_yaxis()
 
-plt.figure()
-plt.suptitle('Diff between raw and standard')
-plt.pcolormesh(rout, zout, numpy.abs(pout - cpg), cmap='jet')
-plt.colorbar()
-plt.gca().invert_yaxis()
+# plt.figure()
+# plt.suptitle('Diff between raw and standard')
+# plt.pcolormesh(rout, zout, numpy.abs(pout - cpg), cmap='jet')
+# plt.colorbar()
+# plt.gca().invert_yaxis()
 plt.show()
