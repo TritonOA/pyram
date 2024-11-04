@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 """
 Description:
-    A jitted function that takes in the mesh parameters and copmutes the parabolic equation solution 
+    A jitted function that takes in the mesh parameters and computes the parabolic equation solution 
 
 Date:
     09/24/2024
@@ -10,19 +11,13 @@ Author: Hunter Akins
 Institution: Scripps Institution of Oceanography, UC San Diego
 """
 
+from numba import jit_module
 import numpy
-from matplotlib import pyplot as plt
-from time import process_time
 from pyram.matrc import matrc
 from pyram.solve import solve
 from pyram.outpt import outpt
-from numba import jit, njit, jit_module
 
 
-print("HI HIHI")
-
-
-# @jit
 def solve_field(
     freq, zs, zr, z_ss, rp_ss, cw, z_sb, rp_sb, cb, rhob, attn, rbzb, dr, dz
 ):
@@ -181,7 +176,6 @@ def solve_field(
     return vr, vz, tlg, tll, cpg, cpl, c0, proc_time
 
 
-# @jit
 def check_inputs(zs, zr, z_ss, rp_ss, cw, z_sb, rp_sb, cb, rhob, attn, rbzb):
     """Basic checks on dimensions of inputs"""
 
@@ -555,7 +549,6 @@ def profl(
     return ksqw, ksqb, p_rhob, alpw, alpb
 
 
-# @njit
 def updat(
     freq,
     zs,
@@ -618,7 +611,6 @@ def updat(
     nzplt,
     r,
 ):
-    #
     omega = 2 * numpy.pi * freq
     k0 = omega / c0
 
@@ -813,7 +805,6 @@ def updat(
     return iz
 
 
-# @njit
 def selfs(
     freq,
     c0,
@@ -922,7 +913,6 @@ def selfs(
     return
 
 
-# @njit
 def epade(np, ip, k0, dr, ns, pd1, pd2):
     """The coefficients of the rational approximation"""
 
@@ -1001,7 +991,6 @@ def epade(np, ip, k0, dr, ns, pd1, pd2):
     return pd1, pd2
 
 
-# @njit
 def deriv(n, sig, alp, dg, dh1, dh2, dh3, _bin, nu):
     """The derivatives of the operator function at x=0"""
 
@@ -1029,7 +1018,6 @@ def deriv(n, sig, alp, dg, dh1, dh2, dh3, _bin, nu):
     return dg, dh1, dh2, dh3
 
 
-# @njit
 def gauss(n, a, b, pivot):
     """Gaussian elimination"""
 
@@ -1055,7 +1043,6 @@ def gauss(n, a, b, pivot):
     return a, b
 
 
-# @njit
 def pivot(n, i, a, b):
     """Rows are interchanged for stability"""
 
@@ -1075,7 +1062,6 @@ def pivot(n, i, a, b):
     return a, b
 
 
-# @njit
 def fndrt(a, n, z, guerre):
     """The root finding subroutine"""
 
@@ -1105,7 +1091,6 @@ def fndrt(a, n, z, guerre):
     return a, z
 
 
-# @njit
 def guerre(a, n, z, err, nter):
     """This subroutine finds a root of a polynomial of degree n > 2 by Laguerre's method"""
 
@@ -1121,7 +1106,7 @@ def guerre(a, n, z, err, nter):
 
     _iter = 0
     jter = 0  # Missing from original code - assume this is correct
-    dz = numpy.Inf
+    dz = numpy.inf
 
     while (numpy.abs(dz) > err) and (_iter < nter - 1):
         p = a[n - 1] + a[n] * z
