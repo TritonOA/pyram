@@ -1,6 +1,6 @@
-Copyright (c) 2000 Dr. Michael D. Collins,
-Copyright (c) 2017 Marcus Donnelly,
-Copyright (c) 2024 Hunter Akins & William Jenkins,
+Copyright (c) 2000 Dr. Michael D. Collins
+Copyright (c) 2017 Marcus Donnelly
+Copyright (c) 2024 Hunter Akins & William Jenkins
 
 All rights reserved.
 
