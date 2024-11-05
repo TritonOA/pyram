@@ -16,24 +16,40 @@ import numpy
 from pyram.matrc import matrc
 from pyram.solve import solve
 from pyram.outpt import outpt
+from pyram.config import Configuration
 
 
 def solve_field(
-    freq, zs, zr, z_ss, rp_ss, cw, z_sb, rp_sb, cb, rhob, attn, rbzb, dr, dz
+    freq: float,
+    zs: numpy.ndarray,
+    zr: numpy.ndarray,
+    z_ss: numpy.ndarray,
+    rp_ss: numpy.ndarray,
+    cw: numpy.ndarray,
+    z_sb: numpy.ndarray,
+    rp_sb: numpy.ndarray,
+    cb: numpy.ndarray,
+    rhob: numpy.ndarray,
+    attn: numpy.ndarray,
+    rbzb: numpy.ndarray,
+    dz: float,
+    ndz: int,
+    dr: float,
+    ndr: int,
+    nump: int,
+    dzf: float,
+    ns: int,
+    lyrw: int,
+    run_id: int,
+    rd_ss: bool,
+    rd_sb: bool,
+    rd_bt: bool,
+    c0: float,
+    lam: float,
+    rmax: float,
+    rs: float,
+    zmplt: float,
 ):
-
-    # Check input dims and get flags indicating which model aspects are range-dependent
-    rd_ss, rd_sb, rd_bt = check_inputs(
-        zs, zr, z_ss, rp_ss, cw, z_sb, rp_sb, cb, rhob, attn, rbzb
-    )
-
-    # get model parameters (num pade coefficients, approximate wavelength, max plot depth, ...
-    np, c0, lam, zmplt, rmax, ns, rs, lyrw, run_id = get_params(
-        freq, zs, zr, z_ss, rp_ss, cw, z_sb, rp_sb, cb, rhob, attn, rbzb, dr, dz
-    )
-
-    ndr, ndz = 1, 1  # stride for saving outputs
-
     (
         u,
         v,
@@ -89,7 +105,7 @@ def solve_field(
         dz,
         ndr,
         ndz,
-        np,
+        nump,
         c0,
         lam,
         zmplt,
@@ -119,7 +135,7 @@ def solve_field(
             dr,
             dz,
             zmax,
-            np,
+            nump,
             c0,
             lam,
             zmplt,
@@ -166,7 +182,7 @@ def solve_field(
             r,
         )
 
-        solve(u, v, s1, s2, s3, r1, r2, r3, iz, nz, np)
+        solve(u, v, s1, s2, s3, r1, r2, r3, iz, nz, nump)
 
         r = (rn + 2) * dr
 
@@ -176,92 +192,6 @@ def solve_field(
     return vr, vz, tlg, tll, cpg, cpl, c0, proc_time
 
 
-def check_inputs(zs, zr, z_ss, rp_ss, cw, z_sb, rp_sb, cb, rhob, attn, rbzb):
-    """Basic checks on dimensions of inputs"""
-
-    _status_ok = True
-
-    # Source and receiver depths
-    if not z_ss[0] <= zs <= z_ss[-1]:
-        _status_ok = False
-        raise ValueError("Source depth outside sound speed depths")
-    if not z_ss[0] <= zr <= z_ss[-1]:
-        _status_ok = False
-        raise ValueError("Receiver depth outside sound speed depths")
-    if _status_ok:
-        z_ss = z_ss
-
-    # Water sound speed profiles
-    num_depths = z_ss.size
-    num_ranges = rp_ss.size
-    cw_dims = cw.shape
-    if (cw_dims[0] == num_depths) and (cw_dims[1] == num_ranges):
-        rp_ss, cw = rp_ss, cw
-    else:
-        raise ValueError("Dimensions of z_ss, rp_ss and cw must be consistent.")
-
-    # Seabed profiles
-    num_depths = z_sb.shape[0]
-    num_ranges = rp_sb.size
-    for prof in [cb, rhob, attn]:
-        prof_dims = prof.shape
-        if (prof_dims[0] != num_depths) or (prof_dims[1] != num_ranges):
-            _status_ok = False
-    if _status_ok:
-        rp_sb, cb, rhob, attn = rp_sb, cb, rhob, attn
-    else:
-        raise ValueError(
-            "Dimensions of z_sb, rp_sb, cb, rhob and attn must be consistent."
-        )
-
-    if rbzb[:, 1].max() <= z_ss[-1]:
-        rbzb = rbzb
-    else:
-        _status_ok = False
-        raise ValueError(
-            "Deepest sound speed point must be at or below deepest bathymetry point."
-        )
-
-    # Set flags for range-dependence (water SSP, seabed profile, bathymetry)
-    rd_ss = True if rp_ss.size > 1 else False
-    rd_sb = True if rp_sb.size > 1 else False
-    rd_bt = True if rbzb.shape[0] > 1 else False
-    return rd_ss, rd_sb, rd_bt
-
-
-# @njit
-def get_params(
-    freq, zs, zr, z_ss, rp_ss, cw, z_sb, rp_sb, cb, rhob, attn, rbzb, dr, dz
-):
-    np_default = 8
-    dzf = 0.1
-    ns_default = 1
-    lyrw_default = 20
-    run_id_default = 0
-
-    np = np_default
-
-    c0 = numpy.mean(cw[:, 0]) if len(cw.shape) > 1 else numpy.mean(cw)
-
-    lam = c0 / freq
-
-    zmplt = rbzb[:, 1].max()
-    tmp_arr = numpy.zeros(3)
-    tmp_arr[0] = rp_ss.max()
-    tmp_arr[1] = rp_sb.max()
-    tmp_arr[2] = rbzb[:, 0].max()
-    rmax = numpy.max(tmp_arr)
-    ns = ns_default
-    rs = rmax + dr
-
-    lyrw = lyrw_default
-
-    run_id = run_id_default
-
-    return np, c0, lam, zmplt, rmax, ns, rs, lyrw, run_id
-
-
-# @njit
 def setup(
     freq,
     zs,
@@ -475,7 +405,6 @@ def setup(
     )
 
 
-# @njit
 def interp(z, z_arr, val_arr, val_l, val_h):
     out = numpy.zeros(z.size)
     for i in range(z.size):
@@ -488,7 +417,6 @@ def interp(z, z_arr, val_arr, val_l, val_h):
     return out
 
 
-# @njit
 def profl(
     freq,
     c0,
@@ -1152,3 +1080,40 @@ def guerre(a, n, z, err, nter):
 
 
 jit_module(nopython=True)
+# Functions defined below this line will NOT be compiled by Numba.
+
+
+def run(config: Configuration) -> tuple:
+    return solve_field(
+        freq=config.frequency,
+        zs=config.source_depth,
+        zr=config.receiver_depth,
+        z_ss=config.water_env.depths,
+        rp_ss=config.water_env.ranges,
+        cw=config.water_env.ssp,
+        z_sb=config.bottom_env.bottom_depths,
+        rp_sb=config.bottom_env.bottom_ranges,
+        cb=config.bottom_env.ssp,
+        rhob=config.bottom_env.density,
+        attn=config.bottom_env.attenuation,
+        rbzb=numpy.array(
+            [config.bottom_env.bathy_ranges, config.bottom_env.bathy_depths]
+        ),
+        dz=config.dz,
+        ndz=config.ndz,
+        dr=config.dr,
+        ndr=config.ndr,
+        nump=config.nump,
+        dzf=config.dzf,
+        ns=config.ns,
+        lyrw=config.lyrw,
+        run_id=config.run_id,
+        rd_ss=config.water_env.is_range_dependent,
+        rd_sb=config.bottom_env.is_range_dependent,
+        rd_bt=config.bottom_env.bathy_is_range_dependent,
+        c0=config.water_env.c0,
+        lam=config.wavelength,
+        rmax=config.rmax,
+        rs=config.rs,
+        zmplt=config.bottom_env.zmplt,
+    )
