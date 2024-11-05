@@ -17,8 +17,8 @@ def main():
     source_depth = 50.0
     receiver_depth = 50.0
     water_env = config.WaterEnvironment(
-        ssp_depths=numpy.array([0, 100.0, 400]),
-        ssp_ranges=numpy.array([0, 25000.0]),
+        depths=numpy.array([0, 100.0, 400]),
+        ranges=numpy.array([0, 25000.0]),
         ssp=numpy.array([[1480, 1530.0], [1520, 1530.0], [1530, 1560.0]]),
     )
     bottom_env = config.BottomEnvironment(
@@ -26,9 +26,9 @@ def main():
         bathy_depths=numpy.array([200.0, 400.0]),
         bottom_depths=numpy.array([[400.0]]),
         bottom_ranges=numpy.array([0, 40000.0]),
-        bottom_ssp=numpy.array([[1700.0, 1700.0]]),
-        bottom_density=numpy.array([[1.5, 1.5]]),
-        bottom_attenuation=numpy.array([[0.5, 0.5]]),
+        ssp=numpy.array([[1700.0, 1700.0]]),
+        density=numpy.array([[1.5, 1.5]]),
+        attenuation=numpy.array([[0.5, 0.5]]),
     )
     cfg = config.Configuration(
         frequency=frequency,
