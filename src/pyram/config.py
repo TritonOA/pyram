@@ -69,7 +69,7 @@ class BottomEnvironment:
 
     @property
     def zmplt(self) -> float:
-        return self.bottom_env.bathy_depths.max()
+        return self.bathy_depths.max()
 
 
 @dataclass
@@ -158,7 +158,7 @@ class Configuration:
             self.bottom_env.bathy_ranges.max(),
             self.bottom_env.bottom_ranges.max(),
         )
-    
+
     @property
     def rs(self) -> float:
         return self.rmax + self.dr
