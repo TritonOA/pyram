@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 import json
+from pathlib import Path
 
 import numpy as np
 
@@ -32,9 +33,9 @@ class BottomEnvironment:
     bathy_depths: np.ndarray
     bottom_depths: np.ndarray
     bottom_ranges: np.ndarray
-    bottom_ssp: np.ndarray
-    bottom_density: np.ndarray
-    bottom_attenuation: np.ndarray
+    ssp: np.ndarray
+    density: np.ndarray
+    attenuation: np.ndarray
 
     def __post_init__(self) -> None:
         self._validate_inputs()
@@ -52,9 +53,9 @@ class BottomEnvironment:
         return any((self.bathy_is_range_dependent, self.bottom_is_range_dependent))
 
     def _validate_inputs(self) -> None:
-        self._validate_profile(self.bottom_ssp)
-        self._validate_profile(self.bottom_density)
-        self._validate_profile(self.bottom_attenuation)
+        self._validate_profile(self.ssp)
+        self._validate_profile(self.density)
+        self._validate_profile(self.attenuation)
 
     def _validate_profile(self, field: np.ndarray) -> None:
         num_depths = self.bottom_depths.shape[0]
@@ -65,6 +66,10 @@ class BottomEnvironment:
                 f"Field shape {field_shape} must match bottom depths "
                 f"{num_depths} and ranges {num_ranges}"
             )
+
+    @property
+    def zmplt(self) -> float:
+        return self.bottom_env.bathy_depths.max()
 
 
 @dataclass
@@ -78,8 +83,8 @@ class WaterEnvironment:
             depths of `ssp_depth` and `N` ranges of `ssp_range` (m/s).
     """
 
-    ssp_depths: np.ndarray
-    ssp_ranges: np.ndarray
+    depths: np.ndarray
+    ranges: np.ndarray
     ssp: np.ndarray
 
     def __post_init__(self) -> None:
@@ -87,17 +92,17 @@ class WaterEnvironment:
 
     @property
     def is_range_dependent(self) -> bool:
-        return self.ssp_ranges.size > 1
+        return self.ranges.size > 1
 
     def _validate_inputs(self) -> None:
-        if self.ssp_depths.size != self.ssp.shape[0]:
+        if self.depths.size != self.ssp.shape[0]:
             raise DimensionMismatchError(
-                f"`ssp_depths` size ({self.ssp_depths.size}) must match "
+                f"`ssp_depths` size ({self.depths.size}) must match "
                 f"`ssp.shape[0]` ({self.ssp.shape[0]})"
             )
-        if self.ssp_ranges.size != self.ssp.shape[1]:
+        if self.ranges.size != self.ssp.shape[1]:
             raise DimensionMismatchError(
-                f"`ssp_ranges` size ({self.ssp_ranges.size}) must match "
+                f"`ssp_ranges` size ({self.ranges.size}) must match "
                 f"`ssp.shape[1]` ({self.ssp.shape[1]})"
             )
 
@@ -132,9 +137,9 @@ class Configuration:
     ndr: int = 1
     nump: int = 8
     dzf: float = 0.1
-    ns_default: int = 1
-    lyrw_default: int = 20
-    run_id_default: int = 0
+    ns: int = 1
+    lyrw: int = 20
+    run_id: int = 0
 
     def __post_init__(self) -> None:
         self._validate_bathymetry()
@@ -146,8 +151,20 @@ class Configuration:
             (self.water_env.is_range_dependent, self.bottom_env.is_range_dependent)
         )
 
+    @property
+    def rmax(self) -> float:
+        return max(
+            self.water_env.ranges.max(),
+            self.bottom_env.bathy_ranges.max(),
+            self.bottom_env.bottom_ranges.max(),
+        )
+    
+    @property
+    def rs(self) -> float:
+        return self.rmax + self.dr
+
     def _validate_bathymetry(self) -> None:
-        if self.bottom_env.bathy_depths.max() > self.water_env.ssp_depths[-1]:
+        if self.bottom_env.bathy_depths.max() > self.water_env.depths[-1]:
             raise ValueError(
                 "Deepest sound speed point must be at or below deepest bathymetry point."
             )
@@ -157,7 +174,7 @@ class Configuration:
         self._validate_depth(self.receiver_depth)
 
     def _validate_depth(self, z: float) -> None:
-        z_ss = self.water_env.ssp_depths
+        z_ss = self.water_env.depths
         if not z_ss[0] <= z <= z_ss[-1]:
             raise ValueError(
                 f"Depth {z} not within min/max sound speed depths {z_ss[0]}/{z_ss[-1]}."
@@ -167,3 +184,14 @@ class Configuration:
     @property
     def wavelength(self) -> float:
         return self.water_env.c0 / self.frequency
+
+
+def read_json(file: Path) -> Configuration:
+    with open(file, "r") as f:
+        config = json.load(f)
+    return Configuration(**config)
+
+
+def save_to_json(config: Configuration) -> None:
+    with open("config.json", "w") as f:
+        json.dump(config.__dict__, f, indent=4)
