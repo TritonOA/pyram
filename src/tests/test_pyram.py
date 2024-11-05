@@ -26,7 +26,8 @@ def main() -> None:
     z_ss = numpy.array([0, 100.0, 400])
     rp_ss = numpy.array([0, 25000.0])
     cw = numpy.array([[1480, 1530.0], [1520, 1530.0], [1530, 1560.0]])
-    rbzb = numpy.array([[0, 200.0], [40000.0, 400.0]])
+    rbzb = numpy.array([[0, 200.0],
+                        [40000.0, 400.0]])
     z_sb = numpy.array([rbzb[:, -1]])
     rp_sb = numpy.array(rbzb[:, 0])
     cb = numpy.array([[1700.0, 1700.0]])
