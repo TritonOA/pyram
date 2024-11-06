@@ -36,7 +36,7 @@ def solve_field(
     ndz: int,
     dr: float,
     ndr: int,
-    nump: int,
+    num_pade: int,
     dzf: float,
     ns: int,
     lyrw: int,
@@ -105,7 +105,7 @@ def solve_field(
         dz,
         ndr,
         ndz,
-        nump,
+        num_pade,
         c0,
         lam,
         zmplt,
@@ -135,7 +135,7 @@ def solve_field(
             dr,
             dz,
             zmax,
-            nump,
+            num_pade,
             c0,
             lam,
             zmplt,
@@ -182,7 +182,7 @@ def solve_field(
             r,
         )
 
-        solve(u, v, s1, s2, s3, r1, r2, r3, iz, nz, nump)
+        solve(u, v, s1, s2, s3, r1, r2, r3, iz, nz, num_pade)
 
         r = (rn + 2) * dr
 
@@ -1082,6 +1082,8 @@ def guerre(a, n, z, err, nter):
 jit_module(nopython=True)
 # Functions defined below this line will NOT be compiled by Numba.
 
+class Result:
+    ...
 
 def run(config: Configuration) -> tuple:
     return solve_field(
@@ -1103,8 +1105,8 @@ def run(config: Configuration) -> tuple:
         ndz=config.ndz,
         dr=config.dr,
         ndr=config.ndr,
-        nump=config.nump,
-        dzf=config.dzf,
+        num_pade=config.num_pade,
+        dzf=config.dz_factor,
         ns=config.ns,
         lyrw=config.lyrw,
         run_id=config.run_id,
