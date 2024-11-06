@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 import json
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 
@@ -124,6 +125,21 @@ class Configuration:
             column environment.
         bottom_env: An instance of `BottomEnvironment` representing the
             seabed environment.
+        dz: Calculation depth step (m). Defaults to _dzf*wavelength.
+        ndz:
+        dr:
+        ndr:
+        num_pade: Number of Pade terms. Defaults to _np_default.
+        dzf:
+        ns:
+        lyrw:
+        run_id:
+
+    Properties:
+        is_range_dependent: True if either the water or bottom environment is range dependent.
+        rmax: Maximum range.
+        rs: Source range.
+        wavelength: Wavelength of the acoustic signal.
     """
 
     frequency: float
@@ -131,12 +147,12 @@ class Configuration:
     receiver_depth: float
     water_env: WaterEnvironment
     bottom_env: BottomEnvironment
-    dz: float = 2.0
+    dz: Optional[float] = None
+    dr: Optional[float] = None
     ndz: int = 1
-    dr: float = 500.0
     ndr: int = 1
-    nump: int = 8
-    dzf: float = 0.1
+    num_pade: int = 8
+    dz_factor: float = 0.1
     ns: int = 1
     lyrw: int = 20
     run_id: int = 0
@@ -144,6 +160,14 @@ class Configuration:
     def __post_init__(self) -> None:
         self._validate_bathymetry()
         self._validate_depths()
+        self.dr = self._set_dr() if self.dr is None else self.dr
+        self.dz = self._set_dz() if self.dz is None else self.dz
+
+    def _set_dz(self) -> float:
+        return self.dz_factor * self.wavelength
+    
+    def _set_dr(self) -> float:
+        return self.num_pade * self.wavelength
 
     @property
     def is_range_dependent(self) -> bool:
