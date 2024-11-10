@@ -41,10 +41,21 @@ def main():
         dz=2.0,
     )
 
+    cfg.save("config.json")
+    cfg2 = config.Configuration.load("config.json")
+
     # vr, vz, tlg, tll, cpg, cpl, c0, proc_time = pr.run(cfg)
     for i in range(4):
         now = time.time()
-        vr, vz, tlg, tll, cpg, cpl, c0, proc_time = pr.run(cfg)
+        result = pr.run(cfg2)
+        vr = result.vr
+        vz = result.vz
+        tlg = result.tlg
+        tll = result.tll
+        cpg = result.cpg
+        cpl = result.cpl
+        c0 = result.c0
+        proc_time = result.proc_time
         print("proc_time", time.time() - now)
 
     k0 = 2 * numpy.pi * frequency / c0
