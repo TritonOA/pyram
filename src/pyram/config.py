@@ -21,11 +21,11 @@ class BottomEnvironment:
         bathy_depths: An `Nx1` array of bathymetry (m) at the `bathy_ranges`.
         bottom_depths: An `Mx1` array of depths (m) for the bottom profile.
         bottom_ranges: An `Nx1` array of ranges (km) for the bottom profile.
-        bottom_ssp: An `MxN` array of sound speed values corresponding to the `M`
+        ssp: An `MxN` array of sound speed values corresponding to the `M`
             depths of `bottom_depths` and `N` ranges of `bottom_ranges` (m/s).
-        bottom_density: An `MxN` array of density values corresponding to the `M`
+        density: An `MxN` array of density values corresponding to the `M`
             depths of `bottom_depths` and `N` ranges of `bottom_ranges` (kg/m^3).
-        bottom_attenuation: An `MxN` array of attenuation values corresponding to
+        attenuation: An `MxN` array of attenuation values corresponding to
             the `M` depths of `bottom_depths` and `N` ranges of `bottom_ranges`
             (dB/m).
     """
@@ -89,8 +89,8 @@ class WaterEnvironment:
     """Underwater environment definition.
 
     Attributes:
-        ssp_depths: An `Mx1` array of depths for the sound speed profile (m).
-        ssp_ranges: An `Nx1` array of ranges for the sound speed profile (km).
+        depths: An `Mx1` array of depths for the sound speed profile (m).
+        ranges: An `Nx1` array of ranges for the sound speed profile (km).
         ssp: An `MxN` array of sound speed values corresponding to the `M`
             depths of `ssp_depth` and `N` ranges of `ssp_range` (m/s).
     """
@@ -143,15 +143,14 @@ class Configuration:
             column environment.
         bottom_env: An instance of `BottomEnvironment` representing the
             seabed environment.
-        dz: Calculation depth step (m). Defaults to _dzf*wavelength.
-        ndz:
-        dr:
-        ndr:
+        dz: Calculation depth step (m). Defaults to `dz_factor * wavelength`.
+        ndz: Number of depth steps. Defaults to 1.
+        dr: Calculation range step (km). Defaults to `num_pade * wavelength`.
+        ndr: Number of range steps. Defaults to 1.
         num_pade: Number of Pade terms. Defaults to _np_default.
-        dzf:
+        dz_factor:
         ns:
         lyrw:
-        run_id:
 
     Properties:
         is_range_dependent: True if either the water or bottom environment is range dependent.
