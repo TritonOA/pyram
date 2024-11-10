@@ -148,7 +148,7 @@ class Configuration:
         dr: Calculation range step (km). Defaults to `num_pade * wavelength`.
         ndr: Number of range steps. Defaults to 1.
         num_pade: Number of Pade terms. Defaults to _np_default.
-        dz_factor:
+        dz_factor: Depth step factor. Defaults to 0.1.
         ns:
         lyrw:
 
