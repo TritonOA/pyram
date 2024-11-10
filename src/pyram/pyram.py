@@ -110,9 +110,7 @@ def solve_field(
         zmplt,
         rmax,
         ns,
-        rs,
         lyrw,
-        run_id,
     )
 
     nr = int(numpy.round(rmax / dr)) - 1
@@ -214,9 +212,7 @@ def setup(
     zmplt,
     rmax,
     ns,
-    rs,
     lyrw,
-    run_id,
 ):
     """Initialise the parameters, acoustic field, and matrices"""
 
