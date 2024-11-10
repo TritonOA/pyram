@@ -60,9 +60,6 @@ def main():
         numpy.abs(numpy.squeeze(cpg)) / numpy.max(numpy.abs(cpg))
     )
 
-    print("Range", vr.min(), vr.max())
-    print("Depth", vz.min(), vz.max())
-
     plt.figure()
     plt.pcolormesh(vr, vz, tl, cmap="jet")
     plt.plot(bottom_env.bathy_ranges, bottom_env.bathy_depths)
