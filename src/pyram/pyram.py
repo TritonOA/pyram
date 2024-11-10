@@ -219,8 +219,6 @@ def setup(
     if rbzb[-1, 0] < rmax:
         rbzb = numpy.append(rbzb, numpy.array([[rmax, rbzb[-1, 1]]]), axis=0)
 
-    eta = 1 / (40 * numpy.pi * numpy.log10(numpy.exp(1)))
-    ib = 0  # Bathymetry pair index
     mdr = 0  # Output range counter
     r = dr
     omega = 2 * numpy.pi * freq
@@ -255,7 +253,6 @@ def setup(
     f2 = numpy.zeros(nz + 2)
     f3 = numpy.zeros(nz + 2)
     ksqw = numpy.zeros(nz + 2)
-    tmp_val = rmax / (dr * ndr)
     nvr = int(numpy.round(rmax / (dr * ndr)))
     rmax = nvr * dr * ndr
     nvz = int(numpy.floor(nzplt / ndz))
