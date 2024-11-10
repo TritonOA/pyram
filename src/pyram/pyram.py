@@ -1100,7 +1100,7 @@ def run(config: Configuration) -> tuple:
         attn=config.bottom_env.attenuation,
         rbzb=numpy.array(
             [config.bottom_env.bathy_ranges, config.bottom_env.bathy_depths]
-        ),
+        ).T,
         dz=config.dz,
         ndz=config.ndz,
         dr=config.dr,
