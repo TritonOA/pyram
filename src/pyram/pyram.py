@@ -11,6 +11,8 @@ Author: Hunter Akins
 Institution: Scripps Institution of Oceanography, UC San Diego
 """
 
+from dataclasses import dataclass
+
 from numba import jit_module
 import numpy
 from pyram.matrc import matrc
@@ -1026,11 +1028,21 @@ def guerre(a, n, z, err, nter):
 jit_module(nopython=True)
 # Functions defined below this line will NOT be compiled by Numba.
 
-class Result:
-    ...
 
-def run(config: Configuration) -> tuple:
-    return solve_field(
+@dataclass
+class Result:
+    vr: numpy.ndarray
+    vz: numpy.ndarray
+    tlg: numpy.ndarray
+    tll: numpy.ndarray
+    cpg: numpy.ndarray
+    cpl: numpy.ndarray
+    c0: float
+    proc_time: float
+
+
+def run(config: Configuration) -> Result:
+    vr, vz, tlg, tll, cpg, cpl, c0, proc_time = solve_field(
         freq=config.frequency,
         zs=config.source_depth,
         zr=config.receiver_depth,
@@ -1062,3 +1074,5 @@ def run(config: Configuration) -> tuple:
         rs=config.rs,
         zmplt=config.bottom_env.zmplt,
     )
+
+    return Result(vr, vz, tlg, tll, cpg, cpl, c0, proc_time)
