@@ -155,7 +155,6 @@ class Configuration:
     dz_factor: float = 0.1
     ns: int = 1
     lyrw: int = 20
-    run_id: int = 0
 
     def __post_init__(self) -> None:
         self._validate_bathymetry()
