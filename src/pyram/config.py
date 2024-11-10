@@ -53,6 +53,21 @@ class BottomEnvironment:
     def is_range_dependent(self) -> bool:
         return any((self.bathy_is_range_dependent, self.bottom_is_range_dependent))
 
+    @property
+    def zmplt(self) -> float:
+        return self.bathy_depths.max()
+
+    def to_json(self) -> dict:
+        return {
+            "bathy_ranges": self.bathy_ranges.tolist(),
+            "bathy_depths": self.bathy_depths.tolist(),
+            "bottom_depths": self.bottom_depths.tolist(),
+            "bottom_ranges": self.bottom_ranges.tolist(),
+            "ssp": self.ssp.tolist(),
+            "density": self.density.tolist(),
+            "attenuation": self.attenuation.tolist(),
+        }
+
     def _validate_inputs(self) -> None:
         self._validate_profile(self.ssp)
         self._validate_profile(self.density)
@@ -67,10 +82,6 @@ class BottomEnvironment:
                 f"Field shape {field_shape} must match bottom depths "
                 f"{num_depths} and ranges {num_ranges}"
             )
-
-    @property
-    def zmplt(self) -> float:
-        return self.bathy_depths.max()
 
 
 @dataclass
@@ -92,8 +103,20 @@ class WaterEnvironment:
         self._validate_inputs()
 
     @property
+    def c0(self) -> float:
+        cw = self.ssp
+        return np.mean(cw[:, 0]) if len(cw.shape) > 1 else np.mean(cw)
+
+    @property
     def is_range_dependent(self) -> bool:
         return self.ranges.size > 1
+
+    def to_json(self) -> dict:
+        return {
+            "depths": self.depths.tolist(),
+            "ranges": self.ranges.tolist(),
+            "ssp": self.ssp.tolist(),
+        }
 
     def _validate_inputs(self) -> None:
         if self.depths.size != self.ssp.shape[0]:
@@ -106,11 +129,6 @@ class WaterEnvironment:
                 f"`ssp_ranges` size ({self.ranges.size}) must match "
                 f"`ssp.shape[1]` ({self.ssp.shape[1]})"
             )
-
-    @property
-    def c0(self) -> float:
-        cw = self.ssp
-        return np.mean(cw[:, 0]) if len(cw.shape) > 1 else np.mean(cw)
 
 
 @dataclass
@@ -162,12 +180,6 @@ class Configuration:
         self.dr = self._set_dr() if self.dr is None else self.dr
         self.dz = self._set_dz() if self.dz is None else self.dz
 
-    def _set_dz(self) -> float:
-        return self.dz_factor * self.wavelength
-    
-    def _set_dr(self) -> float:
-        return self.num_pade * self.wavelength
-
     @property
     def is_range_dependent(self) -> bool:
         return any(
@@ -186,15 +198,79 @@ class Configuration:
     def rs(self) -> float:
         return self.rmax + self.dr
 
+    @property
+    def wavelength(self) -> float:
+        return self.water_env.c0 / self.frequency
+
+    @classmethod
+    def load(cls, file: Path) -> "Configuration":
+        with open(file, "r") as f:
+            data = json.load(f)
+
+        water_env = WaterEnvironment(
+            depths=np.array(data["water_env"]["depths"]),
+            ranges=np.array(data["water_env"]["ranges"]),
+            ssp=np.array(data["water_env"]["ssp"]),
+        )
+
+        bottom_env = BottomEnvironment(
+            bathy_ranges=np.array(data["bottom_env"]["bathy_ranges"]),
+            bathy_depths=np.array(data["bottom_env"]["bathy_depths"]),
+            bottom_depths=np.array(data["bottom_env"]["bottom_depths"]),
+            bottom_ranges=np.array(data["bottom_env"]["bottom_ranges"]),
+            ssp=np.array(data["bottom_env"]["ssp"]),
+            density=np.array(data["bottom_env"]["density"]),
+            attenuation=np.array(data["bottom_env"]["attenuation"]),
+        )
+
+        return cls(
+            frequency=data["frequency"],
+            source_depth=data["source_depth"],
+            receiver_depth=data["receiver_depth"],
+            water_env=water_env,
+            bottom_env=bottom_env,
+            dz=data.get("dz"),
+            dr=data.get("dr"),
+            ndz=data["ndz"],
+            ndr=data["ndr"],
+            num_pade=data["num_pade"],
+            dz_factor=data["dz_factor"],
+            ns=data["ns"],
+            lyrw=data["lyrw"],
+        )
+
+    def save(self, file: Path) -> None:
+        with open(file, "w") as f:
+            json.dump(self.to_json(), f)
+
+    def to_json(self) -> dict:
+        return {
+            "frequency": self.frequency,
+            "source_depth": self.source_depth,
+            "receiver_depth": self.receiver_depth,
+            "water_env": self.water_env.to_json(),
+            "bottom_env": self.bottom_env.to_json(),
+            "dz": self.dz,
+            "dr": self.dr,
+            "ndz": self.ndz,
+            "ndr": self.ndr,
+            "num_pade": self.num_pade,
+            "dz_factor": self.dz_factor,
+            "ns": self.ns,
+            "lyrw": self.lyrw,
+        }
+
+    def _set_dr(self) -> float:
+        return self.num_pade * self.wavelength
+
+    def _set_dz(self) -> float:
+        return self.dz_factor * self.wavelength
+
     def _validate_bathymetry(self) -> None:
         if self.bottom_env.bathy_depths.max() > self.water_env.depths[-1]:
             raise ValueError(
                 "Deepest sound speed point must be at or below deepest bathymetry point."
             )
-
-    def _validate_depths(self) -> None:
-        self._validate_depth(self.source_depth)
-        self._validate_depth(self.receiver_depth)
 
     def _validate_depth(self, z: float) -> None:
         z_ss = self.water_env.depths
@@ -204,17 +280,6 @@ class Configuration:
             )
         return
 
-    @property
-    def wavelength(self) -> float:
-        return self.water_env.c0 / self.frequency
-
-
-def read_json(file: Path) -> Configuration:
-    with open(file, "r") as f:
-        config = json.load(f)
-    return Configuration(**config)
-
-
-def save_to_json(config: Configuration) -> None:
-    with open("config.json", "w") as f:
-        json.dump(config.__dict__, f, indent=4)
+    def _validate_depths(self) -> None:
+        self._validate_depth(self.source_depth)
+        self._validate_depth(self.receiver_depth)
