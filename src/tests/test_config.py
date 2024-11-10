@@ -25,7 +25,7 @@ def main():
     bottom_env = config.BottomEnvironment(
         bathy_ranges=numpy.array([0.0, 40000.0]),
         bathy_depths=numpy.array([200.0, 400.0]),
-        bottom_depths=numpy.array([[0.0, 0.0]]),
+        bottom_depths=numpy.array([[200.0, 400.0]]),
         bottom_ranges=numpy.array([0, 40000.0]),
         ssp=numpy.array([[1700.0, 1700.0]]),
         density=numpy.array([[1.5, 1.5]]),
