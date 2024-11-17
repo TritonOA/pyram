@@ -15,10 +15,10 @@ from dataclasses import dataclass
 
 from numba import jit_module
 import numpy
-from pyram.matrc import matrc
-from pyram.solve import solve
-from pyram.outpt import outpt
 from pyram.config import Configuration
+from pyram.matrc import matrc
+from pyram.outpt import outpt
+from pyram.solve import solve
 
 
 def solve_field(
@@ -1032,8 +1032,36 @@ class Result:
     tll: numpy.ndarray
     cpg: numpy.ndarray
     cpl: numpy.ndarray
+    freq: float
     c0: float
     proc_time: float
+
+    def __post_init__(self):
+        self.k0 = self._compute_wavenumber(self.freq, self.c0)
+        self.tl = self._compute_transmission_loss(self.cpg, self.vr, self.k0)
+
+    @staticmethod
+    def _compute_transmission_loss(
+        cpg: numpy.ndarray, vr: numpy.ndarray, k0: float
+    ) -> numpy.ndarray:
+        # pyram Fourier convention is S(omega) = int s(t) e^{i omega t} dt,
+        # my preference is e^{-i omega t} so i take conjugate
+        cpg = cpg.conj()
+        cpg *= numpy.exp(-1j * vr * k0)  # this follows my preferred convention
+        cpg = (
+            -cpg
+            / numpy.sqrt(vr * 8 * numpy.pi)
+            * numpy.exp(-1j * numpy.pi / 4)
+            / numpy.pi
+        )  # add cylindrical spreading and scalings for comparison with KRAKEN
+
+        return 20 * numpy.log10(
+            numpy.abs(numpy.squeeze(cpg)) / numpy.max(numpy.abs(cpg))
+        )
+
+    @staticmethod
+    def _compute_wavenumber(freq: float, c0: float) -> float:
+        return 2 * numpy.pi * freq / c0
 
 
 def run(config: Configuration) -> Result:
@@ -1069,4 +1097,4 @@ def run(config: Configuration) -> Result:
         zmplt=config.bottom_env.zmplt,
     )
 
-    return Result(vr, vz, tlg, tll, cpg, cpl, c0, proc_time)
+    return Result(vr, vz, tlg, tll, cpg, cpl, config.frequency, c0, proc_time)
