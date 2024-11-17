@@ -4,4 +4,4 @@
 .pydevproject
 /pyram.egg-info
 __pycache__/
-
+config.json
