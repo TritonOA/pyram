@@ -21,7 +21,7 @@ def plot_transmission_loss(
     if ax is None:
         ax = plt.gca()
 
-    im = ax.pcolormesh(x, z, tl, cmap="jet", **kwargs)
+    im = ax.pcolormesh(x, z, tl, cmap="jet", shading="nearest", **kwargs)
 
     cbar = plt.colorbar(im, ax=ax)
     cbar.set_label("Transmission Loss (dB)")
@@ -34,7 +34,16 @@ def plot_water_ssp(
 ) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
-    im = ax.pcolormesh(x, z, c, cmap="jet", **kwargs)
+
+    # Create a finer, regular mesh for x and c (TODO: Make into separate function)
+    N = len(x)
+    new_N = 500
+    x_fine = np.linspace(x.min(), x.max(), num=new_N)
+    nearest_indices = np.searchsorted(x, x_fine, side="right") - 1
+    nearest_indices = np.clip(nearest_indices, 0, N - 1)  # Ensure indices are valid
+    c_fine = c[:, nearest_indices]  # Broadcast indexing to select rows
+
+    im = ax.pcolormesh(x_fine, z, c_fine, cmap="jet", shading="nearest", **kwargs)
 
     cbar = plt.colorbar(im, ax=ax)
     cbar.set_label("Sound Speed (m/s)")
@@ -53,7 +62,11 @@ def plot_ssp():
 
 
 def plot_result(
-    config: Configuration, result: Result, figsize: tuple = (10, 8), dbvmin: float = None, dbvmax: float = None
+    config: Configuration,
+    result: Result,
+    figsize: tuple = (10, 8),
+    dbvmin: float = None,
+    dbvmax: float = None,
 ) -> plt.Figure:
     fig, axs = plt.subplots(nrows=2, ncols=1, figsize=figsize)
 
@@ -74,7 +87,9 @@ def plot_result(
 
     ax = axs[1]
     ax.invert_yaxis()
-    ax = plot_transmission_loss(result.vr, result.vz, result.tl, ax=ax, vmin=dbvmin, vmax=dbvmax)
+    ax = plot_transmission_loss(
+        result.vr, result.vz, result.tl, ax=ax, vmin=dbvmin, vmax=dbvmax
+    )
     ax = plot_bathymetry(
         config.bottom_env.bathy_ranges,
         config.bottom_env.bathy_depths,
