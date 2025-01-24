@@ -240,7 +240,7 @@ class Configuration:
 
     def save(self, file: Path) -> None:
         with open(file, "w") as f:
-            json.dump(self.to_json(), f)
+            json.dump(self.to_json(), f, indent=True)
 
     def to_json(self) -> dict:
         return {
