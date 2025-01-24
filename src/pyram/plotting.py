@@ -53,7 +53,7 @@ def plot_ssp():
 
 
 def plot_result(
-    config: Configuration, result: Result, figsize: tuple = (10, 8)
+    config: Configuration, result: Result, figsize: tuple = (10, 8), dbvmin: float = None, dbvmax: float = None
 ) -> plt.Figure:
     fig, axs = plt.subplots(nrows=2, ncols=1, figsize=figsize)
 
@@ -74,7 +74,7 @@ def plot_result(
 
     ax = axs[1]
     ax.invert_yaxis()
-    ax = plot_transmission_loss(result.vr, result.vz, result.tl, ax=ax)
+    ax = plot_transmission_loss(result.vr, result.vz, result.tl, ax=ax, vmin=dbvmin, vmax=dbvmax)
     ax = plot_bathymetry(
         config.bottom_env.bathy_ranges,
         config.bottom_env.bathy_depths,
